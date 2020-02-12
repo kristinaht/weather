@@ -22,3 +22,15 @@ $(document).ready(function() {
     }
   });
 });
+
+
+// fetch('api string w/ API_KEY').then((responce) => {responce.json()}).then((obj) => {
+//   let questions = obj.results[0].question;
+// });
+
+// async function bears() {
+//   let apiCall = await fetch('api string w/ API_KEY');
+//   let obj = await apiCall.json();
+
+//   return obj;
+// }
