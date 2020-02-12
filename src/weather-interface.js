@@ -1,35 +1,23 @@
 $(document).ready(function() {
   $('#weatherLocation').click(function() {
-    let city = $('#location').val();
-    $('#location').val(""); 
+    const city = $('#location').val();
+    $('#location').val("");
 
-    // We are passing in two parameters; resolve will determine what happens when the promise is resolved while reject will handle the promise if it's rejected.
-    let promise = new Promise(function(resolve, reject) {
-      // We create a new XMLHttpRequest object along with a new XMLHttpRequest method: onload(). onload() is called once the request is complete.
-      let request = new XMLHttpRequest();
-      let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.API_KEY}`;
-      //Since onload() waits until the request is complete, it works perfectly with a promise. If the response has a 200 status, we’ll resolve the promise, which will return the response from the request. If the API call doesn't have a 200 status, the promise will be rejected. We'll call a new instance of JavaScript's built-in Error class. The specific error will be the statusText of our request. (A quick reminder: statusText is a built-in prototype that can be called on a XMLHttpRequest object.)
-      request.onload = function() {
-        if (this.status === 200) {
-          resolve(request.response);
-        } else {
-          reject(Error(request.statusText));
-        }
-      }
-      //Our promise also handles opening and sending the request. We now have an async API call wrapped inside a promise, waiting to be called.
-      request.open("GET", url, true);
-      request.send();
-    });
-    
-    //We've built a promise from scratch. Promises have a number of prototypes, including the then() method. While it works in a similar fashion to jQuery's then() method, note the differences in syntax. If the promise is resolved, we'll parse the JSON and return the temperature and humidity.
-    promise.then(function(response) {
-      let body = JSON.parse(response);
-      $('.showHumidity').text(`The humidity in ${city} is ${body.main.humidity}%`);
-      $(`showTemp`).text(`The temperature in Kelvins is ${body.main.temp} degrees.`);
-    //If it's rejected, we'll take advantage of the Error object's message prototype to return the error. For instance, if we submit a request without inputting a city, we'll get the following: There was an error processing your request: Bad Request.
-    }, function(error) {
-      $('.showErrors').text(`There was an error processing your request: ${error.message}`);
-    });
+    fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=[[API-KEY-GOES-HERE]]`)
+      .then(function(response) {
+        return response.json();
+        // We use the then() method on the promise that fetch() returns. Then we take the response from the resolve promise and call json() on it. This is because the body of a fetch response is a stream that our code must read and convert to JSON.
+      })
+      .then(function(jsonifiedResponse) {
+        getElements(jsonifiedResponse);
+        //The json() method reads a stream and then returns a promise that resolves when once the stream is complete and fully converted to JSON. Our first promise (created with fetch()) makes the API call while our second promise (created with json()) converts the response into JSON.
+      });
+  
+    //Once that is complete, we can use then() once again and use our getElements() callback.
+   const getElements = function(response) {
+      $('.showHumidity').text(`The humidity in ${city} is ${response.main.humidity}%`);
+      $('.showTemp').text(`The temperature in Kelvins is ${response.main.temp} degrees.`);
+    }
   });
 });
 
